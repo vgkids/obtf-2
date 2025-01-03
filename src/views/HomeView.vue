@@ -5,30 +5,20 @@
       ref="editor"
       class="editor"
     ></textarea>
-    <div class="media-panel">
-      <div v-for="file in mediaFiles" :key="file" class="media-item">
-        <img
-          :src="`http://localhost:3000/media/${file}`"
-          :alt="file"
-          class="media-image"
-        />
-        <div class="media-filename">{{ file }}</div>
-      </div>
-    </div>
+    <MediaPanel />
   </main>
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import { useStatusStore } from '@/stores/status'
 import { useNotes } from '@/composables/useNotes'
-import { useMedia } from '@/composables/useMedia'
 import { useKeyboardControl } from '@/composables/useKeyboardControl'
 import { PluginManager } from '../plugins/pluginManager'
+import MediaPanel from '@/components/MediaPanel.vue'
 
 const statusStore = useStatusStore()
 const { content, getOrCreateNotesFile, debouncedSave } = useNotes()
-const { mediaFiles, loadMediaFiles } = useMedia()
 const editor = ref(null)
 const { register } = useKeyboardControl()
 
@@ -46,9 +36,7 @@ const initPlugins = () => {
 }
 
 onMounted(async () => {
-
   await getOrCreateNotesFile()
-  // await loadMediaFiles()
   statusStore.setFileLoaded(true)
 })
 
@@ -75,7 +63,7 @@ watch(() => statusStore.fileLoaded, (isLoaded) => {
 
 textarea.editor {
   width: 66.666667%;
-  height: 90vh;
+  height: 92vh;
   border: none;
   outline: none;
   resize: none;
@@ -89,35 +77,5 @@ textarea.editor {
 
 textarea.editor::-webkit-scrollbar {
   display: none;
-}
-
-.media-panel::-webkit-scrollbar {
-  display: none
- }
-
-.media-panel {
-  width: 33.333333%;
-  height: 90vh;
-  border-left: 1px solid var(--color-border);
-  background: var(--color-background);
-  overflow-y: auto;
-  padding: 0 20px;
-}
-
-.media-item {
-  margin-bottom: 1.5rem;
-}
-
-.media-image {
-  width: 100%;
-  height: auto;
-  border-radius: 4px;
-  margin-bottom: -0.5rem;
-}
-
-.media-filename {
-  font-size: 0.875rem;
-  color: var(--color-text-light);
-  word-break: break-all;
 }
 </style>

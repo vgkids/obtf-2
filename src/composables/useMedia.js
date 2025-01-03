@@ -1,36 +1,39 @@
 // composables/useMedia.js
 import { ref } from 'vue'
 import { useStatusStore } from '@/stores/status'
+import { convertFileSrc, invoke } from '@tauri-apps/api/core';
 
 export function useMedia() {
   const mediaFiles = ref([])
   const statusStore = useStatusStore()
 
-  const getMediaFiles = () => {
-    return fetch('http://localhost:3000/media', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
-      }
-    })
+
+  function allowedFiles(files) {
+    return files.filter(file =>
+      file.toLowerCase().endsWith('.png') ||
+      file.toLowerCase().endsWith('.jpg') ||
+      file.toLowerCase().endsWith('.jpeg') ||
+      file.toLowerCase().endsWith('.gif')
+    )
   }
 
-  const loadMediaFiles = async () => {
+  async function loadMedia() {
     try {
-      const response = await getMediaFiles()
-      if (response.ok) {
-        const files = await response.json()
-        mediaFiles.value = files.filter(file => 
-          file.toLowerCase().endsWith('.png') || 
-          file.toLowerCase().endsWith('.jpg') || 
-          file.toLowerCase().endsWith('.jpeg') ||
-          file.toLowerCase().endsWith('.gif')
-        )
-      } else {
-        console.error('Failed to load media files')
-        statusStore.setError('Failed to load media files')
-        mediaFiles.value = []
-      }
+      // TODO This needs some work, but let's keep moving for now
+      await invoke('set_directory', {
+        path: '/Users/jamesmarks/Documents/OBTF'
+      })
+
+      const files = await invoke('list_media');
+      const processedFiles = allowedFiles(files).map(filePath => {
+        return {
+          name: filePath.split('/').pop(),
+          path: convertFileSrc(filePath)
+        };
+      });
+
+      mediaFiles.value = processedFiles
+
     } catch (error) {
       console.error('Error loading media files:', error)
       mediaFiles.value = []
@@ -39,7 +42,7 @@ export function useMedia() {
   }
 
   return {
-    mediaFiles,
-    loadMediaFiles
+    loadMedia,
+    mediaFiles
   }
 }

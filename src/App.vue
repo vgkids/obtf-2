@@ -36,8 +36,8 @@ div.page {
 
 div.top-nav {
   text-align: center;
-  min-height: 5vh;
-  height: 5vh;
+  min-height: 4vh;
+  height: 4vh;
 /*  background-color: dimgray;*/
 }
 

@@ -87,8 +87,8 @@ async fn list_media(state: State<'_, AppState>) -> Result<Vec<String>, String> {
     let mut files = Vec::new();
     for entry in entries {
         if let Ok(entry) = entry {
-            if let Ok(filename) = entry.file_name().into_string() {
-                files.push(filename);
+            if let Ok(path) = entry.path().into_os_string().into_string() {
+                files.push(path);
             }
         }
     }
