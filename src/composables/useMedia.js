@@ -1,12 +1,20 @@
 // composables/useMedia.js
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useConfigStore } from '@/stores/config'
 import { useStatusStore } from '@/stores/status'
 import { convertFileSrc, invoke } from '@tauri-apps/api/core';
 
 export function useMedia() {
   const mediaFiles = ref([])
+  const configStore = useConfigStore()
   const statusStore = useStatusStore()
 
+
+  watch(() => configStore.isInitialized, async (newValue) => {
+    if (newValue) {
+      loadMedia()
+    }
+  })
 
   function allowedFiles(files) {
     return files.filter(file =>
@@ -19,11 +27,6 @@ export function useMedia() {
 
   async function loadMedia() {
     try {
-      // TODO This needs some work, but let's keep moving for now
-      await invoke('set_directory', {
-        path: '/Users/jamesmarks/Documents/OBTF'
-      })
-
       const files = await invoke('list_media');
       const processedFiles = allowedFiles(files).map(filePath => {
         return {
@@ -42,7 +45,6 @@ export function useMedia() {
   }
 
   return {
-    loadMedia,
     mediaFiles
   }
 }

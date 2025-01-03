@@ -8,14 +8,9 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
 import { useMedia } from '@/composables/useMedia'
 
-const { mediaFiles, loadMedia } = useMedia()
-
-onMounted( () => {
-  loadMedia()
-})
+const { mediaFiles } = useMedia()
 
 </script>
 

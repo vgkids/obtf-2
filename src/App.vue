@@ -20,11 +20,17 @@
 
 
 <script setup>
+import { onMounted } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import { useStatusStore } from '@/stores/status'
+import { useConfigStore } from '@/stores/config'
 
 const statusStore = useStatusStore()
+const configStore = useConfigStore()
 
+onMounted(() => {
+  configStore.setWorkingDirectory()
+})
 
 </script>
 

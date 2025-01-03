@@ -18,7 +18,7 @@ import { PluginManager } from '../plugins/pluginManager'
 import MediaPanel from '@/components/MediaPanel.vue'
 
 const statusStore = useStatusStore()
-const { content, getOrCreateNotesFile, debouncedSave } = useNotes()
+const { content, debouncedSave } = useNotes()
 const editor = ref(null)
 const { register } = useKeyboardControl()
 
@@ -34,11 +34,6 @@ const initPlugins = () => {
     pluginManager.registerPlugin(plugin)
   })
 }
-
-onMounted(async () => {
-  await getOrCreateNotesFile()
-  statusStore.setFileLoaded(true)
-})
 
 // Watch for changes in content
 watch(content, () => {

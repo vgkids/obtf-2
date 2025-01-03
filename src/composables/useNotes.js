@@ -1,13 +1,23 @@
 // useNotes.js
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useConfigStore } from '@/stores/config'
 import { useStatusStore } from '@/stores/status'
 import { invoke } from '@tauri-apps/api/core';
 
 export function useNotes() {
   const content = ref()
+  const configStore = useConfigStore()
   const statusStore = useStatusStore()
   const emptyFileStarter = 'Welcome to your new notes file!\n\n'
   const filename = 'notes.txt'
+
+
+  watch(() => configStore.isInitialized, async (newValue) => {
+    if (newValue) {
+      await getOrCreateNotesFile()
+      statusStore.setFileLoaded(true)
+    }
+  })
 
   // Debounce function
   const debounce = (fn, delay) => {
@@ -52,10 +62,6 @@ export function useNotes() {
 
   const getOrCreateNotesFile = async () => {
     try {
-      // TODO This needs some work, but let's keep moving for now
-      await invoke('set_directory', {
-        path: '/Users/jamesmarks/Documents/OBTF'
-      })
       content.value = await getNotes()
     } catch (error) {
       if (error.startsWith('No such file or directory')) {
