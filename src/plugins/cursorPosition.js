@@ -33,6 +33,12 @@ export class CursorPositionPlugin {
     // Save cursor position on input
     this._editor.addEventListener('input', this.saveCursorPosition)
 
+    // Save cursor position on mouse release, e.g, after a click to a new position
+    this._editor.addEventListener('mouseup', this.saveCursorPosition)
+
+    // Save cursor position on key release, e.g., directional arrows
+    this._editor.addEventListener('keyup', this.saveCursorPosition)
+
     // Save cursor position before window unload
     window.addEventListener('beforeunload', this.saveCursorPosition)
   }

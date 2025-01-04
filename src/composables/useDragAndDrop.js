@@ -15,8 +15,6 @@ export function useDragAndDrop(context) {
       context.content = content.substring(0, currentCursor.value) +
                      blob +
                      content.substring(currentCursor.value)
-      statusStore.setTelemetry(`inserted file`)
-
     } catch(error) {
       statusStore.setError(error)
     }
@@ -27,7 +25,6 @@ export function useDragAndDrop(context) {
   })
 
   context.on('drop', async (event) => {
-    statusStore.setTelemetry(`useDragAndDrop drop event`)
     for (const path of event.payload.paths) {
       await insertFileAtCursor(path)
     }
