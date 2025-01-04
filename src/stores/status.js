@@ -5,6 +5,7 @@ export const useStatusStore = defineStore('status', () => {
   const saveStatus = ref('')
   const error = ref('')
   const fileLoaded = ref(false)
+  const telemetry = ref('')
 
   const setSaveStatus = (status) => {
     saveStatus.value = status
@@ -18,12 +19,18 @@ export const useStatusStore = defineStore('status', () => {
     fileLoaded.value = loaded
   }
 
+  const setTelemetry = (message) => {
+    telemetry.value = message
+  }
+
   return {
     saveStatus,
     error,
     fileLoaded,
+    telemetry,
     setSaveStatus,
     setError,
-    setFileLoaded
+    setFileLoaded,
+    setTelemetry
   }
 })

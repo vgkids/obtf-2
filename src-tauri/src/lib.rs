@@ -1,8 +1,11 @@
 use tauri::State;
 use std::sync::Mutex;
 use std::fs;
-use std::path::PathBuf;
-use serde::{Serialize};
+use std::io::Read;
+use std::path::{Path, PathBuf};
+use std::io::{Seek, SeekFrom};
+use serde::{Deserialize, Serialize};
+
 
 #[derive(Debug, Serialize)]
 struct FileResponse {
@@ -12,6 +15,25 @@ struct FileResponse {
 #[derive(Default)]
 struct AppState {
     files_dir: Mutex<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ContentRange {
+    start: usize,
+    end: usize,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct MediaMatch {
+    filename: String,
+    position: usize,
+    length: usize,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ScanResult {
+    matches: Vec<MediaMatch>,
+    scanned_range: ContentRange,
 }
 
 fn init_app_state() -> AppState {
@@ -97,6 +119,96 @@ async fn list_media(state: State<'_, AppState>) -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
+async fn move_media(path: String, state: State<'_, AppState>) -> Result<String, String> {
+    let files_dir = state.files_dir.lock().unwrap();
+    let media_dir = PathBuf::from(&*files_dir).join("media");
+
+    // Ensure media directory exists
+    if !media_dir.exists() {
+        fs::create_dir_all(&media_dir).map_err(|e| e.to_string())?;
+    }
+
+    // Get the filename from the source path
+    let file_name = Path::new(&path)
+        .file_name()
+        .ok_or("Invalid source path")?
+        .to_str()
+        .ok_or("Invalid filename")?;
+
+    // Create destination path
+    let dest_path = media_dir.join(file_name);
+
+    // Move the file
+    fs::rename(&path, &dest_path).map_err(|e| e.to_string())?;
+
+    // Return the new path as a string
+    dest_path
+        .into_os_string()
+        .into_string()
+        .map_err(|_| "Failed to convert path to string".to_string())
+}
+
+#[tauri::command]
+async fn scan_content_for_media(
+    filename: String,
+    range: ContentRange,
+    state: State<'_, AppState>
+) -> Result<ScanResult, String> {
+    let files_dir = state.files_dir.lock().unwrap();
+    let file_path = PathBuf::from(&*files_dir).join(&filename);
+    let media_dir = PathBuf::from(&*files_dir).join("media");
+
+    // Get the media files with their full paths
+    let entries = fs::read_dir(media_dir)
+        .map_err(|e| e.to_string())?;
+
+    // Store tuples of (filename, full_path)
+    let media_files: Vec<(String, String)> = entries
+        .filter_map(|entry| {
+            let entry = entry.ok()?;
+            let filename = entry.file_name().into_string().ok()?;
+            let full_path = entry.path().into_os_string().into_string().ok()?;
+            Some((filename, full_path))
+        })
+        .collect();
+
+    let file = std::fs::File::open(&file_path)
+        .map_err(|e| e.to_string())?;
+    let mut reader = std::io::BufReader::new(file);
+
+    reader.seek(SeekFrom::Start(range.start as u64))
+        .map_err(|e| e.to_string())?;
+
+    let mut content = String::new();
+    reader.take((range.end - range.start) as u64)
+        .read_to_string(&mut content)
+        .map_err(|e| e.to_string())?;
+
+    let content_lower = content.to_lowercase();
+    let mut matches = Vec::new();
+
+    for (filename, full_path) in media_files.iter() {
+        let filename_lower = filename.to_lowercase();
+        let mut start = 0;
+
+        while let Some(pos) = content_lower[start..].find(&filename_lower) {
+            let abs_pos = start + pos;
+            matches.push(MediaMatch {
+                filename: full_path.clone(), // Now using the full path
+                position: range.start + abs_pos,
+                length: filename_lower.len(),
+            });
+            start = abs_pos + 1;
+        }
+    }
+
+    Ok(ScanResult {
+        matches,
+        scanned_range: range,
+    })
+}
+
+#[tauri::command]
 async fn set_directory(path: String, state: State<'_, AppState>) -> Result<FileResponse, String> {
 
     dbg!(&path);
@@ -122,6 +234,8 @@ pub fn run() {
             update_file,
             delete_file,
             list_media,
+            move_media,
+            scan_content_for_media,
             set_directory
         ])
         .run(tauri::generate_context!())

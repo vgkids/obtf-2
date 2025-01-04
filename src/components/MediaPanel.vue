@@ -8,9 +8,8 @@
 </template>
 
 <script setup>
-import { useMedia } from '@/composables/useMedia'
 
-const { mediaFiles } = useMedia()
+defineProps(['mediaFiles'])
 
 </script>
 

@@ -7,8 +7,8 @@
     <span v-if="statusStore.saveStatus" class="save-status">
       {{ statusStore.saveStatus }}
     </span>
-    <span v-if="statusStore.activeTool" class="active-tool">
-      {{ statusStore.activeTool }}
+    <span v-if="statusStore.telemetry" class="telemetry">
+      {{ statusStore.telemetry }}
     </span>
   </div>
   </header>
@@ -53,7 +53,7 @@ div.top-nav {
   padding: 0.2rem 0.5rem;
 }
 
-.save-status, .active-tool {
+.save-status, .telemetry {
   margin-left: 1rem;
   font-size: 0.9em;
   color: #666;

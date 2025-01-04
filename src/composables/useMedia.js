@@ -4,44 +4,26 @@ import { useConfigStore } from '@/stores/config'
 import { useStatusStore } from '@/stores/status'
 import { convertFileSrc, invoke } from '@tauri-apps/api/core';
 
-export function useMedia() {
+export function useMedia(context) {
   const mediaFiles = ref([])
-  const configStore = useConfigStore()
-  const statusStore = useStatusStore()
 
-
-  watch(() => configStore.isInitialized, async (newValue) => {
-    if (newValue) {
-      loadMedia()
-    }
-  })
+  if (context) {
+    context.on('mediaMatches', (matches) => {
+      mediaFiles.value = allowedFiles(matches)
+      .map(match => ({
+        path: convertFileSrc(match.filename),
+        name: match.filename.split('/').pop()
+      }))
+    })
+  }
 
   function allowedFiles(files) {
     return files.filter(file =>
-      file.toLowerCase().endsWith('.png') ||
-      file.toLowerCase().endsWith('.jpg') ||
-      file.toLowerCase().endsWith('.jpeg') ||
-      file.toLowerCase().endsWith('.gif')
+      file.filename.toLowerCase().endsWith('.png') ||
+      file.filename.toLowerCase().endsWith('.jpg') ||
+      file.filename.toLowerCase().endsWith('.jpeg') ||
+      file.filename.toLowerCase().endsWith('.gif')
     )
-  }
-
-  async function loadMedia() {
-    try {
-      const files = await invoke('list_media');
-      const processedFiles = allowedFiles(files).map(filePath => {
-        return {
-          name: filePath.split('/').pop(),
-          path: convertFileSrc(filePath)
-        };
-      });
-
-      mediaFiles.value = processedFiles
-
-    } catch (error) {
-      console.error('Error loading media files:', error)
-      mediaFiles.value = []
-      statusStore.setError(error)
-    }
   }
 
   return {
