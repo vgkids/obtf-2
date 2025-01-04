@@ -44,14 +44,14 @@ export class DatedBlankPagePlugin {
       }
       blob += '\n\n';
       // marking where we want the cursor to land before we add more space
-      const mark = context.content.value.length + blob.length;
+      const mark = context.content.length + blob.length;
       
       // then the blank lines after so there's plenty of room to type
       for (let i = 0; i < blankLinesAfter; i++) {
         blob += '\n';
       }
 
-      context.content.value += blob;
+      context.content += blob;
       await context.nextTick();
       context.editor.focus();
       context.editor.scrollTop = context.editor.scrollHeight;

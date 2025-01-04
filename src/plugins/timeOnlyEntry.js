@@ -8,9 +8,9 @@ export class TimeOnlyEntryPlugin {
   initialize(context) {
     context.register(this.shortcut, this.name, async () => {
       const cursor = context.editor.selectionStart;
-      const content = context.content.value;
+      const content = context.content;
       const prefix = this.prefix(content, cursor);
-      context.content.value = content.substring(0, cursor) + prefix + content.substring(cursor);
+      context.content = content.substring(0, cursor) + prefix + content.substring(cursor);
       await context.nextTick();
       const newCursor = cursor + prefix.length;
       context.editor.setSelectionRange(newCursor, newCursor);

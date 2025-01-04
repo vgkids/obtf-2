@@ -7,15 +7,13 @@ import { convertFileSrc, invoke } from '@tauri-apps/api/core';
 export function useMedia(context) {
   const mediaFiles = ref([])
 
-  if (context) {
-    context.on('mediaMatches', (matches) => {
-      mediaFiles.value = allowedFiles(matches)
-      .map(match => ({
-        path: convertFileSrc(match.filename),
-        name: match.filename.split('/').pop()
-      }))
-    })
-  }
+  context.on('mediaMatches', (matches) => {
+    mediaFiles.value = allowedFiles(matches)
+    .map(match => ({
+      path: convertFileSrc(match.filename),
+      name: match.filename.split('/').pop()
+    }))
+  })
 
   function allowedFiles(files) {
     return files.filter(file =>

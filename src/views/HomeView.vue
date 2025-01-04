@@ -1,16 +1,16 @@
 <template>
-  <main class="flex"
-    @dragover.prevent="handleDragEnter"
-    @dragleave.prevent="handleDragLeave"
-    @drop.prevent="handleDrop"
-  >
-
+  <main class="flex">
     <textarea
       v-model="content"
       ref="editor"
       class="editor"
     ></textarea>
-    <MediaPanel :mediaFiles="mediaFiles" />
+    <MediaPanel
+      :mediaFiles="mediaFiles"
+    />
+    <DragDropOverlay
+      :pluginManager="pluginManager"
+    />
   </main>
 </template>
 
@@ -19,49 +19,11 @@ import { nextTick, onMounted, ref, watch } from 'vue'
 import { useStatusStore } from '@/stores/status'
 import { useMedia } from '@/composables/useMedia'
 import { useNotes } from '@/composables/useNotes'
+import { useDragAndDrop } from '@/composables/useDragAndDrop'
 import { useKeyboardControl } from '@/composables/useKeyboardControl'
 import { PluginManager } from '../plugins/pluginManager'
 import MediaPanel from '@/components/MediaPanel.vue'
-
-import { listen } from '@tauri-apps/api/event'
-import { invoke } from '@tauri-apps/api/core';
-
-let handleDrop = () => {};
-let handleDragEnter = () => {};
-let handleDragLeave = () => {};
-const isDraggingOver = ref(false)
-
-onMounted(async () => {
-  handleDrop = await listen("tauri://drag-drop",
-    async (event) => {
-      event.payload.paths.forEach(async (path) => {
-        try {
-          await invoke('move_media', {path})
-
-          const cursor = localStorage.getItem('cursor')
-          const blob = `\n${path.split('/').pop()}\n`
-          content.value = content.value.substring(0, cursor) + blob + content.value.substring(cursor)
-          const newCursor = cursor + blob.length;
-          // editor.setSelectionRange(newCursor, newCursor)
-
-          // TODO insert into text file
-
-          console.log(path)
-        } catch(error) {
-          statusStore.setError(error)
-        }
-      })
-      isDraggingOver.value = false;
-  });
-
-  handleDragEnter = await listen("tauri://drag-enter",
-    () => (isDraggingOver.value = true)
-  );
-
-  handleDragLeave = await listen("tauri://drag-leave",
-    () => (isDraggingOver.value = false)
-  );
-});
+import DragDropOverlay from '@/components/DragDropOverlay.vue'
 
 const statusStore = useStatusStore()
 const { content, debouncedSave } = useNotes()
@@ -69,22 +31,28 @@ const editor = ref(null)
 const mediaFiles = ref([])
 const { register } = useKeyboardControl()
 
+const pluginManager = ref({})
+const pluginContext = ref(null)
+
 const initPlugins = () => {
-  const context = {
+  pluginContext.value = {
     editor: editor.value,
     content,
     register,
-    nextTick
+    nextTick,
+    watch
   }
-  const pluginManager = new PluginManager(context)
-  const { mediaFiles: mediaFilesRef } = useMedia(context)
+
+  pluginManager.value = new PluginManager(pluginContext.value)
+  const { mediaFiles: mediaFilesRef } = useMedia(pluginContext.value)
+  useDragAndDrop(pluginContext.value)
 
   watch(mediaFilesRef, (newFiles) => {
     mediaFiles.value = newFiles
   })
 
   PluginManager.createDefaultPlugins().forEach(plugin => {
-    pluginManager.registerPlugin(plugin)
+    pluginManager.value.registerPlugin(plugin)
   })
 }
 
@@ -101,13 +69,13 @@ watch(() => statusStore.fileLoaded, (isLoaded) => {
     initPlugins()
   }
 })
-
 </script>
 
 <style scoped>
 .flex {
   display: flex;
   width: 100%;
+  position: relative;
 }
 
 textarea.editor {

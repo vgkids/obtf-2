@@ -27,7 +27,7 @@ export class MediaScannerPlugin {
     this.statusStore = useStatusStore();
 
     // Set up content change watcher
-    watch(() => context.content.value, this.handleContentChange.bind(this));
+    watch(() => context.content, this.handleContentChange.bind(this));
 
     // Set up viewport change listener
     context.editor.addEventListener('scroll', debounce(this.handleViewportChange.bind(this), 150));

@@ -9,10 +9,10 @@ export class SpacesForTabPlugin {
   initialize(context) {
     context.register(this.shortcut, this.name, async () => {
       const cursor = context.editor.selectionStart;
-      const content = context.content.value;
+      const content = context.content;
       
       let blob = '    ';
-      context.content.value = content.substring(0, cursor) + blob + content.substring(cursor);
+      context.content = content.substring(0, cursor) + blob + content.substring(cursor);
       await context.nextTick();
       const newCursor = cursor + blob.length;
       context.editor.setSelectionRange(newCursor, newCursor);
