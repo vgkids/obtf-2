@@ -12,9 +12,19 @@ export function useDragAndDrop(context) {
       await invoke('move_media', { path })
       const content = context.content
       const blob = `${path.split('/').pop()}\n`
-      context.content = content.substring(0, currentCursor.value) +
-                     blob +
-                     content.substring(currentCursor.value)
+      const encoder = new TextEncoder();
+      const decoder = new TextDecoder();
+
+      const before = encoder.encode(content.substring(0, currentCursor.value));
+      const middle = encoder.encode(blob);
+      const after = encoder.encode(content.substring(currentCursor.value));
+
+      const combined = new Uint8Array(before.length + middle.length + after.length);
+      combined.set(before, 0);
+      combined.set(middle, before.length);
+      combined.set(after, before.length + middle.length);
+
+      context.content = decoder.decode(combined);
     } catch(error) {
       statusStore.setError(error)
     }

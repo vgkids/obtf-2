@@ -1,9 +1,9 @@
 use tauri::State;
 use std::sync::Mutex;
 use std::fs;
-use std::io::Read;
+// use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::io::{Seek, SeekFrom};
+// use std::io::{Seek, SeekFrom};
 use serde::{Deserialize, Serialize};
 
 
@@ -150,12 +150,10 @@ async fn move_media(path: String, state: State<'_, AppState>) -> Result<String, 
 
 #[tauri::command]
 async fn scan_content_for_media(
-    filename: String,
-    range: ContentRange,
+    content: String,
     state: State<'_, AppState>
 ) -> Result<ScanResult, String> {
     let files_dir = state.files_dir.lock().unwrap();
-    let file_path = PathBuf::from(&*files_dir).join(&filename);
     let media_dir = PathBuf::from(&*files_dir).join("media");
 
     // Get the media files with their full paths
@@ -172,18 +170,6 @@ async fn scan_content_for_media(
         })
         .collect();
 
-    let file = std::fs::File::open(&file_path)
-        .map_err(|e| e.to_string())?;
-    let mut reader = std::io::BufReader::new(file);
-
-    reader.seek(SeekFrom::Start(range.start as u64))
-        .map_err(|e| e.to_string())?;
-
-    let mut content = String::new();
-    reader.take((range.end - range.start) as u64)
-        .read_to_string(&mut content)
-        .map_err(|e| e.to_string())?;
-
     let content_lower = content.to_lowercase();
     let mut matches = Vec::new();
 
@@ -192,19 +178,21 @@ async fn scan_content_for_media(
         let mut start = 0;
 
         while let Some(pos) = content_lower[start..].find(&filename_lower) {
-            let abs_pos = start + pos;
             matches.push(MediaMatch {
-                filename: full_path.clone(), // Now using the full path
-                position: range.start + abs_pos,
+                filename: full_path.clone(),
+                position: pos,
                 length: filename_lower.len(),
             });
-            start = abs_pos + 1;
+            start = pos + 1;
         }
     }
 
     Ok(ScanResult {
         matches,
-        scanned_range: range,
+        scanned_range: ContentRange {
+            start: 0,
+            end: content.len()
+        },
     })
 }
 

@@ -34,6 +34,33 @@ const { register } = useKeyboardControl()
 const pluginManager = ref({})
 const pluginContext = ref(null)
 
+// Keeping this for a minute for hack performance testing
+// const stats = {
+//   'textarea-update': { sum: 0, count: 0, avg: 0, last: 0 },
+// };
+
+// function updateStat(name, duration) {
+//   stats[name].sum += duration;
+//   stats[name].count++;
+//   stats[name].avg = stats[name].sum / stats[name].count;
+//   stats[name].last = duration;
+// }
+
+// onMounted(() => {
+
+// editor.value.addEventListener('keydown', (e) => {
+//   const start = performance.now();
+
+//   requestAnimationFrame(() => {
+
+//     updateStat('textarea-update', performance.now() - start)
+//     console.table(stats);
+//   });
+
+// });
+
+// })
+
 const initPlugins = () => {
   pluginContext.value = {
     editor: editor.value,
