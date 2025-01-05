@@ -3,7 +3,7 @@ export class DatedBlankPagePlugin {
   constructor() {
     this.name = 'Dated Blank Page';
     this.description = 'Creates a new dated page with divider';
-    this.shortcut = 'command-k';
+    this.shortcut = 'none';
   }
 
   formatDateTime() {

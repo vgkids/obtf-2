@@ -10,7 +10,7 @@ export function useDragAndDrop(context) {
   const insertFileAtCursor = async (path) => {
     try {
       await invoke('move_media', { path })
-      const content = context.content
+      const content = context.editor.value
       const blob = `${path.split('/').pop()}\n`
       const encoder = new TextEncoder();
       const decoder = new TextDecoder();
@@ -23,8 +23,8 @@ export function useDragAndDrop(context) {
       combined.set(before, 0);
       combined.set(middle, before.length);
       combined.set(after, before.length + middle.length);
-
-      context.content = decoder.decode(combined);
+      context.editor.value = decoder.decode(combined)
+      context.editor.dispatchEvent(new Event('input'))
     } catch(error) {
       statusStore.setError(error)
     }

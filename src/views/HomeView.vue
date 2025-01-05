@@ -1,7 +1,6 @@
 <template>
   <main class="flex">
     <textarea
-      v-model="content"
       ref="editor"
       class="editor"
     ></textarea>
@@ -26,7 +25,7 @@ import MediaPanel from '@/components/MediaPanel.vue'
 import DragDropOverlay from '@/components/DragDropOverlay.vue'
 
 const statusStore = useStatusStore()
-const { content, debouncedSave } = useNotes()
+const { content } = useNotes()
 const editor = ref(null)
 const mediaFiles = ref([])
 const { register } = useKeyboardControl()
@@ -34,37 +33,20 @@ const { register } = useKeyboardControl()
 const pluginManager = ref({})
 const pluginContext = ref(null)
 
-// Keeping this for a minute for hack performance testing
-// const stats = {
-//   'textarea-update': { sum: 0, count: 0, avg: 0, last: 0 },
-// };
 
-// function updateStat(name, duration) {
-//   stats[name].sum += duration;
-//   stats[name].count++;
-//   stats[name].avg = stats[name].sum / stats[name].count;
-//   stats[name].last = duration;
-// }
-
-// onMounted(() => {
-
-// editor.value.addEventListener('keydown', (e) => {
-//   const start = performance.now();
-
-//   requestAnimationFrame(() => {
-
-//     updateStat('textarea-update', performance.now() - start)
-//     console.table(stats);
-//   });
-
-// });
-
-// })
+// Keeping this around for a bit so we find out sooner if we introduce a problem.
+onMounted(() => {
+  editor.value.addEventListener('keydown', (e) => {
+    const start = performance.now();
+    requestAnimationFrame(() => {
+      statusStore.updateStat('editor-keydown', performance.now() - start)
+    });
+  });
+})
 
 const initPlugins = () => {
   pluginContext.value = {
     editor: editor.value,
-    content,
     register,
     nextTick,
     watch
@@ -83,16 +65,11 @@ const initPlugins = () => {
   })
 }
 
-// Watch for changes in content
-watch(content, () => {
-  if (!statusStore.fileLoaded) return
-  statusStore.setSaveStatus('Unsaved changes...')
-  debouncedSave()
-})
-
 // Watch for file loaded state to initialize plugins
 watch(() => statusStore.fileLoaded, (isLoaded) => {
-  if (isLoaded && editor.value) {
+  // Um.
+  editor.value.value = content.value
+  if (isLoaded) {
     initPlugins()
   }
 })

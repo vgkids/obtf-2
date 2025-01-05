@@ -25,20 +25,11 @@ export class MediaScannerPlugin {
 
   initialize(context) {
     this.context = context;
-    this.content = context.content;
+    this.content = '';
     this.configStore = useConfigStore();
     this.statusStore = useStatusStore();
-
-
-    watch(() => context.content, async (newVal) => {
-      if (!newVal) return
-      this.content = newVal
-      this.debouncedScan();
-    });
-
-    // This works fine, because it doesn't rely on the reactivity loop
-    context.editor.addEventListener('scroll', () => this.debouncedScan());
-
+    context.editor.addEventListener('scroll', this.debouncedScan);
+    context.editor.addEventListener('input', this.debouncedScan)
   }
 
   getVisibleRange() {
@@ -69,7 +60,8 @@ export class MediaScannerPlugin {
   }
 
   async scanViewport() {
-    if (!this.content) return;
+    if (!this.context.editor) return;
+    this.content = this.context.editor.value
     if (this.isScanning.value) return;
 
     try {

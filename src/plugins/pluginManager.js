@@ -1,5 +1,5 @@
 // src/plugins/pluginManager.js
-import { CursorPositionPlugin } from './cursorPosition.js';
+import { SaveManager } from './saveManager.js';
 import { DatedBlankPagePlugin } from './datedBlankPage.js';
 import { MediaScannerPlugin } from './mediaScannerPlugin.js';
 import { SpacesForTabPlugin } from './spacesForTab.js';
@@ -38,7 +38,7 @@ export class PluginManager {
 
   static createDefaultPlugins() {
     return [
-      new CursorPositionPlugin(),
+      new SaveManager(),
       new DatedBlankPagePlugin(),
       new MediaScannerPlugin(),
       new SpacesForTabPlugin(),

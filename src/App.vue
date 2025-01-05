@@ -10,6 +10,9 @@
     <span v-if="statusStore.telemetry" class="telemetry">
       {{ statusStore.telemetry }}
     </span>
+    <span class="stats">
+      editor keydown: {{ statusStore.stats['editor-keydown'].last}}ms
+    </span>
   </div>
   </header>
 
