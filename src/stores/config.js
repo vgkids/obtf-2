@@ -6,6 +6,7 @@ import { invoke } from '@tauri-apps/api/core'
 
 export const useConfigStore = defineStore('config', () => {
   const workingDirectory = ref('')
+  const filename = 'notes.txt'
   const isInitialized = ref(false)
 
   const setWorkingDirectory = async () => {
@@ -25,6 +26,7 @@ export const useConfigStore = defineStore('config', () => {
   }
 
   return {
+    filename,
     workingDirectory,
     isInitialized,
     setWorkingDirectory

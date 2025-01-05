@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
+import { useConfigStore } from '@/stores/config'
 import { useStatusStore } from '@/stores/status'
 
 
@@ -42,9 +43,6 @@ export class SaveManager {
     // Save on key release, e.g., directional arrows
     this._editor.addEventListener('keyup', this.saveAll)
 
-    // Manual content changes without a UI event, like drag and drop
-    // this._context.on('contentChange', this.saveAll)
-
     // Save before window unload
     window.addEventListener('beforeunload', this.saveAll)
   }
@@ -62,8 +60,9 @@ export class SaveManager {
   }
 
   async saveNotes() {
+    const configStore = useConfigStore()
     await invoke('update_file', {
-      filename: 'notes.txt',
+      filename: configStore.filename,
       content: this._editor.value
     })
   }

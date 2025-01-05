@@ -1,8 +1,6 @@
 // composables/useMedia.js
 import { ref, watch } from 'vue'
-import { useConfigStore } from '@/stores/config'
-import { useStatusStore } from '@/stores/status'
-import { convertFileSrc, invoke } from '@tauri-apps/api/core';
+import { convertFileSrc } from '@tauri-apps/api/core';
 
 export function useMedia(context) {
   const mediaFiles = ref([])

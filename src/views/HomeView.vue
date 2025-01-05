@@ -67,7 +67,6 @@ const initPlugins = () => {
 
 // Watch for file loaded state to initialize plugins
 watch(() => statusStore.fileLoaded, (isLoaded) => {
-  // Um.
   editor.value.value = content.value
   if (isLoaded) {
     initPlugins()
