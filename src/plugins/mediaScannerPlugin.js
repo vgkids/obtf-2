@@ -54,7 +54,13 @@ export class MediaScannerPlugin {
     let position = 0;
     // Sum up lengths of all previous lines, plus their newline characters
     for (let i = 0; i < lineNumber; i++) {
-      position += lines[i].length + 1; // +1 for the newline character
+      try {
+        position += lines[i].length + 1; // +1 for the newline character
+      } catch (error) {
+        // This happens when the textarea is allowed to soft wrap, because
+        // the editor content has more lines than just splitting on \n.
+        console.log(`Unable to get character position for lineNumber: ${lineNumber}`)
+      }
     }
     return position;
   }

@@ -3,6 +3,7 @@
     <textarea
       ref="editor"
       class="editor"
+      wrap="off"
     ></textarea>
     <MediaPanel
       :mediaFiles="mediaFiles"
