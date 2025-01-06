@@ -6,10 +6,13 @@ export const useStatusStore = defineStore('status', () => {
   const error = ref('')
   const fileLoaded = ref(false)
   const telemetry = ref('')
+  const lineCount = ref()
 
   // Keeping this for a minute for hack performance testing
   const stats = ref({
     'editor-keydown': { sum: 0, count: 0, avg: 0, last: 0 },
+    'saveAll': { sum: 0, count: 0, avg: 0, last: 0 },
+    'blank-page': { sum: 0, count: 0, avg: 0, last: 0 },
   });
 
   const updateStat =(name, duration) => {
@@ -17,6 +20,10 @@ export const useStatusStore = defineStore('status', () => {
     stats.value[name].count++;
     stats.value[name].avg = stats.value[name].sum / stats.value[name].count;
     stats.value[name].last = Math.round(duration, 3);
+  }
+
+  const setLineCount = (count) => {
+    lineCount.value = count
   }
 
   const setSaveStatus = (status) => {
@@ -36,6 +43,8 @@ export const useStatusStore = defineStore('status', () => {
   }
 
   return {
+    lineCount,
+    setLineCount,
     saveStatus,
     error,
     fileLoaded,

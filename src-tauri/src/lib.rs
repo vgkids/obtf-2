@@ -1,11 +1,10 @@
-use tauri::State;
-use std::sync::Mutex;
 use std::fs;
+use std::sync::Mutex;
+use tauri::State;
 // use std::io::Read;
 use std::path::{Path, PathBuf};
 // use std::io::{Seek, SeekFrom};
 use serde::{Deserialize, Serialize};
-
 
 #[derive(Debug, Serialize)]
 struct FileResponse {
@@ -47,25 +46,31 @@ async fn read_file(filename: String, state: State<'_, AppState>) -> Result<Strin
     let files_dir = state.files_dir.lock().unwrap();
     let file_path = PathBuf::from(&*files_dir).join(&filename);
 
-    fs::read_to_string(file_path)
-        .map_err(|e| e.to_string())
+    fs::read_to_string(file_path).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-async fn write_file(filename: String, content: String, state: State<'_, AppState>) -> Result<FileResponse, String> {
+async fn write_file(
+    filename: String,
+    content: String,
+    state: State<'_, AppState>,
+) -> Result<FileResponse, String> {
     let files_dir = state.files_dir.lock().unwrap();
     let file_path = PathBuf::from(&*files_dir).join(&filename);
 
-    fs::write(file_path, content)
-        .map_err(|e| e.to_string())?;
+    fs::write(file_path, content).map_err(|e| e.to_string())?;
 
     Ok(FileResponse {
-        message: "File written successfully".into()
+        message: "File written successfully".into(),
     })
 }
 
 #[tauri::command]
-async fn update_file(filename: String, content: String, state: State<'_, AppState>) -> Result<FileResponse, String> {
+async fn update_file(
+    filename: String,
+    content: String,
+    state: State<'_, AppState>,
+) -> Result<FileResponse, String> {
     let files_dir = state.files_dir.lock().unwrap();
     let file_path = PathBuf::from(&*files_dir).join(&filename);
 
@@ -73,11 +78,10 @@ async fn update_file(filename: String, content: String, state: State<'_, AppStat
         return Err("File not found".into());
     }
 
-    fs::write(file_path, content)
-        .map_err(|e| e.to_string())?;
+    fs::write(file_path, content).map_err(|e| e.to_string())?;
 
     Ok(FileResponse {
-        message: "File updated successfully".into()
+        message: "File updated successfully".into(),
     })
 }
 
@@ -86,11 +90,10 @@ async fn delete_file(filename: String, state: State<'_, AppState>) -> Result<Fil
     let files_dir = state.files_dir.lock().unwrap();
     let file_path = PathBuf::from(&*files_dir).join(&filename);
 
-    fs::remove_file(file_path)
-        .map_err(|e| e.to_string())?;
+    fs::remove_file(file_path).map_err(|e| e.to_string())?;
 
     Ok(FileResponse {
-        message: "File deleted successfully".into()
+        message: "File deleted successfully".into(),
     })
 }
 
@@ -103,8 +106,7 @@ async fn list_media(state: State<'_, AppState>) -> Result<Vec<String>, String> {
         fs::create_dir_all(&media_dir).map_err(|e| e.to_string())?;
     }
 
-    let entries = fs::read_dir(media_dir)
-        .map_err(|e| e.to_string())?;
+    let entries = fs::read_dir(media_dir).map_err(|e| e.to_string())?;
 
     let mut files = Vec::new();
     for entry in entries {
@@ -151,14 +153,13 @@ async fn move_media(path: String, state: State<'_, AppState>) -> Result<String, 
 #[tauri::command]
 async fn scan_content_for_media(
     content: String,
-    state: State<'_, AppState>
+    state: State<'_, AppState>,
 ) -> Result<ScanResult, String> {
     let files_dir = state.files_dir.lock().unwrap();
     let media_dir = PathBuf::from(&*files_dir).join("media");
 
     // Get the media files with their full paths
-    let entries = fs::read_dir(media_dir)
-        .map_err(|e| e.to_string())?;
+    let entries = fs::read_dir(media_dir).map_err(|e| e.to_string())?;
 
     // Store tuples of (filename, full_path)
     let media_files: Vec<(String, String)> = entries
@@ -191,21 +192,20 @@ async fn scan_content_for_media(
         matches,
         scanned_range: ContentRange {
             start: 0,
-            end: content.len()
+            end: content.len(),
         },
     })
 }
 
 #[tauri::command]
 async fn set_directory(path: String, state: State<'_, AppState>) -> Result<FileResponse, String> {
-
     dbg!(&path);
 
     let mut files_dir = state.files_dir.lock().unwrap();
     *files_dir = path;
 
     Ok(FileResponse {
-        message: "Directory path set successfully".into()
+        message: "Directory path set successfully".into(),
     })
 }
 
@@ -214,6 +214,7 @@ pub fn run() {
     let app_state = init_app_state();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .manage(app_state)
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![

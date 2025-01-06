@@ -8,6 +8,11 @@ export const useConfigStore = defineStore('config', () => {
   const workingDirectory = ref('')
   const filename = 'notes.txt'
   const isInitialized = ref(false)
+  const inspectorEnabled = ref(true)
+
+  const setInspectorEnabled = (val) => {
+    inspectorEnabled.value = val
+  }
 
   const setWorkingDirectory = async () => {
     try {
@@ -26,6 +31,8 @@ export const useConfigStore = defineStore('config', () => {
   }
 
   return {
+    inspectorEnabled,
+    setInspectorEnabled,
     filename,
     workingDirectory,
     isInitialized,

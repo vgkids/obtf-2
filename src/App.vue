@@ -10,15 +10,22 @@
     <span v-if="statusStore.telemetry" class="telemetry">
       {{ statusStore.telemetry }}
     </span>
-    <span class="stats">
-      editor keydown: {{ statusStore.stats['editor-keydown'].last}}ms
-    </span>
   </div>
   </header>
 
   <div class="page">
     <RouterView />
   </div>
+
+  <div v-if="configStore.inspectorEnabled" class="inspector">
+    <span class="stats">
+      <p>lineCount: {{ statusStore.lineCount }} </p>
+      <p>keydown lag: {{ statusStore.stats['editor-keydown'].last}}ms</p>
+      <p>saveAll count: {{ statusStore.stats['saveAll'].count }}, lag: {{ statusStore.stats['saveAll'].last }}ms</p>
+      <p>new page lag: {{ statusStore.stats['blank-page'].last }}ms</p>
+    </span>
+  </div>
+
 </template>
 
 
@@ -60,6 +67,16 @@ div.top-nav {
   margin-left: 1rem;
   font-size: 0.9em;
   color: #666;
+}
+
+div.inspector {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 33.33%;
+  height: 200px;
+  padding: 8px;
+  background-color: var(--color-background-mute);
 }
 
 </style>

@@ -4,7 +4,9 @@
       ref="editor"
       class="editor"
       wrap="off"
+      spellcheck="false"
     ></textarea>
+
     <MediaPanel
       :mediaFiles="mediaFiles"
     />
@@ -16,6 +18,7 @@
 
 <script setup>
 import { nextTick, onMounted, ref, watch } from 'vue'
+import { useConfigStore } from '@/stores/config'
 import { useStatusStore } from '@/stores/status'
 import { useMedia } from '@/composables/useMedia'
 import { useNotes } from '@/composables/useNotes'
@@ -25,18 +28,22 @@ import { PluginManager } from '../plugins/pluginManager'
 import MediaPanel from '@/components/MediaPanel.vue'
 import DragDropOverlay from '@/components/DragDropOverlay.vue'
 
+
+const configStore = useConfigStore()
 const statusStore = useStatusStore()
 const { content } = useNotes()
 const editor = ref(null)
 const mediaFiles = ref([])
-const { register } = useKeyboardControl()
+// const { register } = useKeyboardControl()
+
 
 const pluginManager = ref({})
 const pluginContext = ref(null)
 
 
 // Keeping this around for a bit so we find out sooner if we introduce a problem.
-onMounted(() => {
+onMounted( async () => {
+  if (!configStore.inspectorEnabled) return;
   editor.value.addEventListener('keydown', (e) => {
     const start = performance.now();
     requestAnimationFrame(() => {
@@ -48,7 +55,6 @@ onMounted(() => {
 const initPlugins = () => {
   pluginContext.value = {
     editor: editor.value,
-    register,
     nextTick,
     watch
   }
