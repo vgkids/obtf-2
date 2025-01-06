@@ -41,7 +41,7 @@ export class PluginManager {
       new SaveManager(),
       new DatedBlankPagePlugin(),
       new MediaScannerPlugin(),
-      // new SpacesForTabPlugin(),
+      new SpacesForTabPlugin(),
       // new TimeOnlyEntryPlugin(),
     ];
   }

@@ -23,7 +23,6 @@ import { useStatusStore } from '@/stores/status'
 import { useMedia } from '@/composables/useMedia'
 import { useNotes } from '@/composables/useNotes'
 import { useDragAndDrop } from '@/composables/useDragAndDrop'
-import { useKeyboardControl } from '@/composables/useKeyboardControl'
 import { PluginManager } from '../plugins/pluginManager'
 import MediaPanel from '@/components/MediaPanel.vue'
 import DragDropOverlay from '@/components/DragDropOverlay.vue'
@@ -34,7 +33,6 @@ const statusStore = useStatusStore()
 const { content } = useNotes()
 const editor = ref(null)
 const mediaFiles = ref([])
-// const { register } = useKeyboardControl()
 
 
 const pluginManager = ref({})

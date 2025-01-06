@@ -1,13 +1,13 @@
 
+import { PluginBaseShortcut } from '@/plugins/PluginBaseShortcut'
 import { register } from '@tauri-apps/plugin-global-shortcut';
 import { useStatusStore } from '@/stores/status'
 
-// src/plugins/datedBlankPage.js
-export class DatedBlankPagePlugin {
+export class DatedBlankPagePlugin extends PluginBaseShortcut {
   constructor() {
+    super();
     this.name = 'Dated Blank Page';
     this.description = 'Creates a new dated page with divider';
-    this.shortcut = 'none';
     this.performing = false
   }
 
@@ -28,7 +28,7 @@ export class DatedBlankPagePlugin {
 
   async initialize(context) {
     await register('CommandOrControl+K', () => {
-      this.perform(context)
+      this.debouncedPerform(context);
     });
   }
 
