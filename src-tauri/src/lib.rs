@@ -43,6 +43,20 @@ pub struct MenuItemConfig {
     submenu: Option<String>,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SearchResult {
+    matches: Vec<SearchMatch>,
+    total_matches: usize,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SearchMatch {
+    line_number: usize,
+    start_char: usize,
+    end_char: usize,
+    line_content: String,
+}
+
 fn init_app_state() -> AppState {
     AppState {
         files_dir: Mutex::new(String::new()),
@@ -292,6 +306,56 @@ async fn set_menu_items(menu_items: Vec<MenuItemConfig>, app: tauri::AppHandle) 
     Ok(())
 }
 
+#[tauri::command]
+async fn search_text(
+    filename: String,
+    query: String,
+    case_sensitive: Option<bool>,
+    state: State<'_, AppState>,
+) -> Result<SearchResult, String> {
+    let files_dir = state.files_dir.lock().unwrap();
+    let file_path = PathBuf::from(&*files_dir).join(&filename);
+
+    let content = fs::read_to_string(file_path).map_err(|e| e.to_string())?;
+
+    if query.is_empty() {
+        return Ok(SearchResult {
+            matches: vec![],
+            total_matches: 0,
+        });
+    }
+
+    let case_sensitive = case_sensitive.unwrap_or(false);
+    let search_query = if case_sensitive { query.clone() } else { query.to_lowercase() };
+
+    let mut matches = Vec::new();
+    let lines: Vec<&str> = content.lines().collect();
+    let mut char_offset = 0;
+
+    for (line_number, line) in lines.iter().enumerate() {
+        let search_line = if case_sensitive { line.to_string() } else { line.to_lowercase() };
+        let mut start_pos = 0;
+
+        while let Some(pos) = search_line[start_pos..].find(&search_query) {
+            let actual_pos = start_pos + pos;
+            matches.push(SearchMatch {
+                line_number: line_number + 1,
+                start_char: char_offset + actual_pos,
+                end_char: char_offset + actual_pos + query.len(),
+                line_content: line.to_string(),
+            });
+            start_pos = actual_pos + 1;
+        }
+
+        char_offset += line.len() + 1; // +1 for newline
+    }
+
+    Ok(SearchResult {
+        total_matches: matches.len(),
+        matches,
+    })
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app_state = init_app_state();
@@ -317,7 +381,8 @@ pub fn run() {
             scan_content_for_media,
             set_directory,
             get_menu_items,
-            set_menu_items
+            set_menu_items,
+            search_text
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

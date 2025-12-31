@@ -4,6 +4,7 @@ import { DatedBlankPagePlugin } from './datedBlankPage.js';
 import { MediaScannerPlugin } from './mediaScannerPlugin.js';
 import { SpacesForTabPlugin } from './spacesForTab.js';
 import { TimeOnlyEntryPlugin } from './timeOnlyEntry.js';
+import { Find } from './find.js';
 
 export class PluginManager {
   constructor(context) {
@@ -49,6 +50,7 @@ export class PluginManager {
       new MediaScannerPlugin(),
       new SpacesForTabPlugin(),
       new TimeOnlyEntryPlugin(),
+      new Find(),
     ];
   }
 }

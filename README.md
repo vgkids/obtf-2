@@ -25,7 +25,7 @@ In many notes apps, the act of taking notes can become a task itself, diverting 
 OBTF is defined by what it doesn't do:
 - Store data in a proprietary format
 - Style text
-- Support hierarchical notes, tagging and categorization
+- Support hierarchical notes, tagging or categorization
 - Sync your notes across devices
 - Expand URL's into previews
 - Provide a calendar view
@@ -43,5 +43,6 @@ OBTF stands for One Big Text File, and aims to do a few things well:
 - Search across large periods of time and context
 - Store notes in a format that will be readable in 100 years
 - Provide a simple plugin system to enhance the editor
-- Present screenshots in a timeline with notes *TODO*
+- Move screenshots to a place that's out of the way and searchable
+- Present screenshots in a timeline with notes
 - Collect tasks into a list *TODO*
