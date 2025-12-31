@@ -1,9 +1,18 @@
 // src/plugins/types.js
+// MenuItem interface:
+// {
+//   id: string
+//   title: string
+//   shortcut?: string
+//   submenu?: string
+// }
+
 // EditorPlugin interface:
 // {
 //   name: string
 //   description: string
 //   shortcut?: string
+//   menuItem?: MenuItem
 //   initialize: (context: EditorContext) => void
 // }
 

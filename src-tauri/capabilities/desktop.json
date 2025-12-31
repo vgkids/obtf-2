@@ -9,6 +9,6 @@
     "main"
   ],
   "permissions": [
-    "global-shortcut:default"
+    "core:menu:default"
   ]
 }

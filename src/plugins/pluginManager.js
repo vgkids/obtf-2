@@ -3,7 +3,7 @@ import { SaveManager } from './saveManager.js';
 import { DatedBlankPagePlugin } from './datedBlankPage.js';
 import { MediaScannerPlugin } from './mediaScannerPlugin.js';
 import { SpacesForTabPlugin } from './spacesForTab.js';
-import { TimeOnlyEntryPlugin } from './timeOnlyEntry.js';
+// import { TimeOnlyEntryPlugin } from './timeOnlyEntry.js';
 
 export class PluginManager {
   constructor(context) {
@@ -22,6 +22,12 @@ export class PluginManager {
 
   getPlugins() {
     return this.plugins;
+  }
+
+  getMenuItems() {
+    return this.plugins
+      .filter(plugin => plugin.menuItem)
+      .map(plugin => plugin.menuItem);
   }
 
   emit(event, data) {

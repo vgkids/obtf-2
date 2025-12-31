@@ -1,6 +1,6 @@
 use std::fs;
 use std::sync::Mutex;
-use tauri::State;
+use tauri::{Emitter, State, menu::{Menu, PredefinedMenuItem, SubmenuBuilder}};
 // use std::io::Read;
 use std::path::{Path, PathBuf};
 // use std::io::{Seek, SeekFrom};
@@ -33,6 +33,14 @@ pub struct MediaMatch {
 pub struct ScanResult {
     matches: Vec<MediaMatch>,
     scanned_range: ContentRange,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct MenuItemConfig {
+    id: String,
+    title: String,
+    shortcut: Option<String>,
+    submenu: Option<String>,
 }
 
 fn init_app_state() -> AppState {
@@ -209,14 +217,96 @@ async fn set_directory(path: String, state: State<'_, AppState>) -> Result<FileR
     })
 }
 
+fn build_menu<R: tauri::Runtime>(app: &tauri::AppHandle<R>, menu_items: Vec<MenuItemConfig>) -> tauri::Result<Menu<R>> {
+    use std::collections::HashMap;
+
+    let mut submenus: HashMap<String, Vec<tauri::menu::MenuItem<R>>> = HashMap::new();
+
+    for item in menu_items {
+        let submenu_name = item.submenu.unwrap_or_else(|| "Edit".to_string());
+        let menu_item = tauri::menu::MenuItem::with_id(
+            app,
+            &item.id,
+            &item.title,
+            true,
+            item.shortcut.as_deref()
+        )?;
+
+        submenus.entry(submenu_name)
+            .or_insert_with(Vec::new)
+            .push(menu_item);
+    }
+
+    let menu = Menu::new(app)?;
+
+    // Create Application menu (first position - becomes the app menu on macOS)
+    let app_submenu = SubmenuBuilder::new(app, "App")
+        .text("about", "About")
+        .separator()
+        .text("quit", "Quit")
+        .build()?;
+    menu.append(&app_submenu)?;
+
+    // Handle Edit menu specially to merge predefined and plugin items
+    let mut edit_submenu = SubmenuBuilder::new(app, "Edit")
+        .item(&PredefinedMenuItem::cut(app, None)?)
+        .item(&PredefinedMenuItem::copy(app, None)?)
+        .item(&PredefinedMenuItem::paste(app, None)?)
+        .separator();
+
+    // Add plugin items to Edit menu if they exist
+    if let Some(edit_items) = submenus.remove("Edit") {
+        for item in edit_items {
+            edit_submenu = edit_submenu.item(&item);
+        }
+    }
+
+    let edit_menu = edit_submenu.build()?;
+    menu.append(&edit_menu)?;
+
+    // Create remaining submenus (excluding Edit since we handled it above)
+    for (submenu_name, items) in submenus {
+        let submenu = SubmenuBuilder::new(app, &submenu_name);
+        let mut submenu_with_items = submenu;
+        for item in items {
+            submenu_with_items = submenu_with_items.item(&item);
+        }
+        let built_submenu = submenu_with_items.build()?;
+        menu.append(&built_submenu)?;
+    }
+
+    Ok(menu)
+}
+
+#[tauri::command]
+async fn get_menu_items() -> Result<Vec<MenuItemConfig>, String> {
+    // This command will be called from the frontend to get plugin-defined menu items
+    // The actual implementation will be on the frontend side via JS
+    Ok(vec![])
+}
+
+#[tauri::command]
+async fn set_menu_items(menu_items: Vec<MenuItemConfig>, app: tauri::AppHandle) -> Result<(), String> {
+    let menu = build_menu(&app, menu_items).map_err(|e| e.to_string())?;
+    app.set_menu(menu).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app_state = init_app_state();
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .manage(app_state)
         .plugin(tauri_plugin_opener::init())
+        .setup(|_app| {
+            // Menu will be set dynamically from frontend plugins
+            Ok(())
+        })
+        .on_menu_event(|app, event| {
+            // Emit all menu events to frontend, plugins will handle them
+            let _ = app.emit("menu", event.id().as_ref());
+        })
         .invoke_handler(tauri::generate_handler![
             read_file,
             write_file,
@@ -225,7 +315,9 @@ pub fn run() {
             list_media,
             move_media,
             scan_content_for_media,
-            set_directory
+            set_directory,
+            get_menu_items,
+            set_menu_items
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

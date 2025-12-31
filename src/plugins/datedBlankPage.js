@@ -1,6 +1,6 @@
 
 import { PluginBaseShortcut } from '@/plugins/PluginBaseShortcut'
-import { register } from '@tauri-apps/plugin-global-shortcut';
+import { listen } from '@tauri-apps/api/event';
 import { useStatusStore } from '@/stores/status'
 
 export class DatedBlankPagePlugin extends PluginBaseShortcut {
@@ -8,7 +8,13 @@ export class DatedBlankPagePlugin extends PluginBaseShortcut {
     super();
     this.name = 'Dated Blank Page';
     this.description = 'Creates a new dated page with divider';
-    this.performing = false
+    this.performing = false;
+    this.menuItem = {
+      id: 'new_dated_page',
+      title: 'New Dated Page', 
+      shortcut: 'CmdOrCtrl+K',
+      submenu: 'Edit'
+    };
   }
 
   formatDateTime() {
@@ -27,8 +33,10 @@ export class DatedBlankPagePlugin extends PluginBaseShortcut {
   }
 
   async initialize(context) {
-    await register('CommandOrControl+K', () => {
-      this.debouncedPerform(context);
+    await listen('menu', (event) => {
+      if (event.payload === 'new_dated_page') {
+        this.debouncedPerform(context);
+      }
     });
   }
 

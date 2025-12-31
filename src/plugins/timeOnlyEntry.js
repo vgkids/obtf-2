@@ -2,11 +2,16 @@ export class TimeOnlyEntryPlugin {
   constructor() {
     this.name = 'Time-Only Mini Entry';
     this.description = 'Adds a timestamp entry on Enter';
-    this.shortcut = 'shift-Enter';
+    this.menuItem = {
+      id: 'insert_time',
+      title: 'Insert Time',
+      shortcut: 'shift-Enter',
+      submenu: 'Edit'
+    };
   }
 
   initialize(context) {
-    context.register(this.shortcut, this.name, async () => {
+    context.register(this.menuItem.shortcut, this.name, async () => {
       const cursor = context.editor.selectionStart;
       const content = context.content;
       const prefix = this.prefix(content, cursor);

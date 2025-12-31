@@ -8,7 +8,7 @@ export const useConfigStore = defineStore('config', () => {
   const workingDirectory = ref('')
   const filename = 'notes.txt'
   const isInitialized = ref(false)
-  const inspectorEnabled = ref(true)
+  const inspectorEnabled = ref(false)
 
   const setInspectorEnabled = (val) => {
     inspectorEnabled.value = val

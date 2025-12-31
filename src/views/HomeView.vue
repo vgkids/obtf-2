@@ -26,6 +26,7 @@ import { useDragAndDrop } from '@/composables/useDragAndDrop'
 import { PluginManager } from '../plugins/pluginManager'
 import MediaPanel from '@/components/MediaPanel.vue'
 import DragDropOverlay from '@/components/DragDropOverlay.vue'
+import { invoke } from '@tauri-apps/api/core'
 
 
 const configStore = useConfigStore()
@@ -50,11 +51,20 @@ onMounted( async () => {
   });
 })
 
-const initPlugins = () => {
+const initPlugins = async () => {
   pluginContext.value = {
     editor: editor.value,
+    content: content.value,
     nextTick,
-    watch
+    watch,
+    register: (key, name, callback) => {
+      // Register keyboard shortcuts - this could be expanded later
+      console.log(`Registering shortcut: ${key} for ${name}`)
+      // For now, just log the registration
+    },
+    getLineCount: () => {
+      return content.value ? content.value.split('\n').length : 0
+    }
   }
 
   pluginManager.value = new PluginManager(pluginContext.value)
@@ -68,6 +78,20 @@ const initPlugins = () => {
   PluginManager.createDefaultPlugins().forEach(plugin => {
     pluginManager.value.registerPlugin(plugin)
   })
+
+  // Set up menu items from plugins
+  const menuItems = pluginManager.value.getMenuItems()
+  console.log('Menu items from plugins:', menuItems)
+  if (menuItems.length > 0) {
+    try {
+      await invoke('set_menu_items', { menuItems })
+      console.log('Successfully set menu items')
+    } catch (error) {
+      console.error('Failed to set menu items:', error)
+    }
+  } else {
+    console.log('No menu items found from plugins')
+  }
 }
 
 // Watch for file loaded state to initialize plugins

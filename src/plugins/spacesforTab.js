@@ -1,5 +1,5 @@
 import { PluginBaseShortcut } from '@/plugins/PluginBaseShortcut'
-import { register } from '@tauri-apps/plugin-global-shortcut';
+import { listen } from '@tauri-apps/api/event';
 import { useStatusStore } from '@/stores/status'
 
 export class SpacesForTabPlugin extends PluginBaseShortcut {
@@ -7,11 +7,19 @@ export class SpacesForTabPlugin extends PluginBaseShortcut {
     super();
     this.name = 'Spaces for Tab';
     this.description = 'Replace a tab with spaces';
+    this.menuItem = {
+      id: 'insert_spaces',
+      title: 'Insert Spaces',
+      shortcut: 'Tab',
+      submenu: 'Edit'
+    };
   }
 
   async initialize(context) {
-    await register('Tab', () => {
-      this.debouncedPerform(context);
+    await listen('menu', (event) => {
+      if (event.payload === 'insert_spaces') {
+        this.debouncedPerform(context);
+      }
     });
   }
 
