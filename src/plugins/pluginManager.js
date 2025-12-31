@@ -3,7 +3,7 @@ import { SaveManager } from './saveManager.js';
 import { DatedBlankPagePlugin } from './datedBlankPage.js';
 import { MediaScannerPlugin } from './mediaScannerPlugin.js';
 import { SpacesForTabPlugin } from './spacesForTab.js';
-// import { TimeOnlyEntryPlugin } from './timeOnlyEntry.js';
+import { TimeOnlyEntryPlugin } from './timeOnlyEntry.js';
 
 export class PluginManager {
   constructor(context) {
@@ -48,7 +48,7 @@ export class PluginManager {
       new DatedBlankPagePlugin(),
       new MediaScannerPlugin(),
       new SpacesForTabPlugin(),
-      // new TimeOnlyEntryPlugin(),
+      new TimeOnlyEntryPlugin(),
     ];
   }
 }
