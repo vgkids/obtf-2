@@ -7,17 +7,12 @@ export class SpacesForTabPlugin extends PluginBaseShortcut {
     super();
     this.name = 'Spaces for Tab';
     this.description = 'Replace a tab with spaces';
-    this.menuItem = {
-      id: 'insert_spaces',
-      title: 'Insert Spaces',
-      shortcut: 'Tab',
-      submenu: 'Edit'
-    };
   }
 
   async initialize(context) {
-    await listen('menu', (event) => {
-      if (event.payload === 'insert_spaces') {
+    context.editor.addEventListener('keydown', (event) => {
+      if (event.key === 'Tab') {
+        event.preventDefault();
         this.debouncedPerform(context);
       }
     });

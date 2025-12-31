@@ -1,6 +1,6 @@
 use std::fs;
 use std::sync::Mutex;
-use tauri::{Emitter, State, menu::{Menu, PredefinedMenuItem, SubmenuBuilder}};
+use tauri::{Emitter, State, menu::{Menu, SubmenuBuilder}};
 // use std::io::Read;
 use std::path::{Path, PathBuf};
 // use std::io::{Seek, SeekFrom};
@@ -249,9 +249,9 @@ fn build_menu<R: tauri::Runtime>(app: &tauri::AppHandle<R>, menu_items: Vec<Menu
 
     // Handle Edit menu specially to merge predefined and plugin items
     let mut edit_submenu = SubmenuBuilder::new(app, "Edit")
-        .item(&PredefinedMenuItem::cut(app, None)?)
-        .item(&PredefinedMenuItem::copy(app, None)?)
-        .item(&PredefinedMenuItem::paste(app, None)?)
+        .cut()
+        .copy()
+        .paste()
         .separator();
 
     // Add plugin items to Edit menu if they exist
