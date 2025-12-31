@@ -173,8 +173,8 @@ export class Find extends PluginBaseShortcut {
     const resultsDiv = document.createElement('div');
     resultsDiv.className = 'find-results';
     resultsDiv.style.cssText = `
-      background: black;
-      border: 1px solid rgb(93, 85, 131);
+      background: rgb(48, 47, 50);
+      border: 1px solid rgb(55, 55, 55);
       border-radius: 4px;
       margin-top: 5px;
       overflow-y: auto;
@@ -192,7 +192,7 @@ export class Find extends PluginBaseShortcut {
         const isActive = index === 0;
         return `
           <div class="find-result-item" 
-               style="padding: 16px 8px; cursor: pointer; ${isActive ? 'border-left: 3px solid #007acc;' : ''}"
+               style="padding: 16px 8px; cursor: pointer; ${isActive ? 'border-left: 3px solid rgb(122, 113, 139);' : ''}"
                data-line="${match.line_number}"
                data-index="${index}"
                onclick="this.closest('.find-search-container').dispatchEvent(new CustomEvent('jumpToLine', { detail: ${match.line_number} }))">
@@ -247,7 +247,7 @@ export class Find extends PluginBaseShortcut {
     const resultItems = this.searchUI.results.querySelectorAll('.find-result-item');
     resultItems.forEach((item, index) => {
       if (index === this.activeResultIndex) {
-        item.style.borderLeft = '3px solid #007acc';
+        item.style.borderLeft = '3px solid rgb(122, 113, 139)';
       } else {
         item.style.borderLeft = '';
       }
