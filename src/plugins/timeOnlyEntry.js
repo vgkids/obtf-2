@@ -5,7 +5,7 @@ export class TimeOnlyEntryPlugin extends PluginBaseShortcut {
   constructor() {
     super();
     this.name = 'Time-Only Mini Entry';
-    this.description = 'Adds a timestamp entry on Enter';
+    this.description = 'Adds a timestamp';
     this.menuItem = {
       id: 'insert_time',
       title: 'New Entry',
@@ -13,8 +13,6 @@ export class TimeOnlyEntryPlugin extends PluginBaseShortcut {
       submenu: 'Edit'
     };
   }
-
-
 
   async initialize(context) {
     await listen('menu', (event) => {
