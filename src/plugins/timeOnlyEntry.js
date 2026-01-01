@@ -23,12 +23,26 @@ export class TimeOnlyEntryPlugin extends PluginBaseShortcut {
   }
 
   perform(context) {
-    const cursor = context.editor.selectionStart;
-    let blob = '\n\n' + this.formatTime() + '\n';
-    let content = context.editor.value;
-    context.editor.value = content.substring(0, cursor) + blob + content.substring(cursor);
-    const newCursor = cursor + blob.length;
-    context.editor.setSelectionRange(newCursor, newCursor)
+    // Get current selection
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+
+    // Create the time entry text
+    const timeText = '\n\n---' + this.formatTime() + '\n';
+    const textNode = document.createTextNode(timeText);
+
+    // Insert the text directly at the cursor position
+    range.deleteContents();
+    range.insertNode(textNode);
+
+    // Move cursor to after the inserted text
+    range.setStartAfter(textNode);
+    range.setEndAfter(textNode);
+    selection.removeAllRanges();
+    selection.addRange(range);
+
     context.editor.dispatchEvent(new Event('input'))
   }
 

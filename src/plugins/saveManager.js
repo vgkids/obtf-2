@@ -58,7 +58,8 @@ export class SaveManager {
   async saveAll() {
     if (!this._editor) return
     const statusStore = useStatusStore()
-    statusStore.setLineCount(this._editor.value.split('\n').length)
+    const content = this._editor.textContent || ''
+    statusStore.setLineCount(content.split('\n').length)
     const start = performance.now();
     await this.saveCursorPosition()
     await this.saveNotes()
@@ -66,29 +67,58 @@ export class SaveManager {
   }
 
   async saveCursorPosition() {
-    const cursor = this._editor.selectionStart
+    const selection = window.getSelection()
+    if (!selection.rangeCount) return
+
+    const range = selection.getRangeAt(0)
+    const preCaretRange = range.cloneRange()
+    preCaretRange.selectNodeContents(this._editor)
+    preCaretRange.setEnd(range.startContainer, range.startOffset)
+    const cursor = preCaretRange.toString().length
+
     localStorage.setItem('cursor', cursor.toString())
     this._context.emit('cursorChange', cursor)
   }
 
   async saveNotes() {
     const configStore = useConfigStore()
+    const content = this._editor.textContent || ''
     await invoke('update_file', {
       filename: configStore.filename,
-      content: this._editor.value
+      content: content
     })
   }
 
   restoreCursorPosition() {
     if (!this._editor) return
-    const content = this._editor.value
+    const content = this._editor.textContent || ''
     const savedPosition = parseInt(localStorage.getItem('cursor')) || 0
     const maxPosition = content.length
 
     // Ensure the cursor position is within bounds
     const safePosition = Math.min(savedPosition, maxPosition)
 
-    this._editor.setSelectionRange(safePosition, safePosition)
+    // Set cursor position for contenteditable
+    const textNode = this._editor.firstChild || this._editor
+    if (textNode.nodeType === Node.TEXT_NODE) {
+      const range = document.createRange()
+      const selection = window.getSelection()
+      const actualPosition = Math.min(safePosition, textNode.textContent.length)
+
+      range.setStart(textNode, actualPosition)
+      range.setEnd(textNode, actualPosition)
+      selection.removeAllRanges()
+      selection.addRange(range)
+    } else {
+      // Fallback for empty contenteditable
+      const range = document.createRange()
+      const selection = window.getSelection()
+      range.selectNodeContents(this._editor)
+      range.collapse(false)
+      selection.removeAllRanges()
+      selection.addRange(range)
+    }
+
     this._editor.focus()
 
     // Scroll cursor into view

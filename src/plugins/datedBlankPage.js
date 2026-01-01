@@ -17,11 +17,19 @@ export class DatedBlankPagePlugin extends PluginBaseShortcut {
     };
   }
 
-  formatDateTime() {
+  formatDate() {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
+      hour12: true
+    }).format(new Date());
+  }
+
+  formatTime() {
+    return new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
       hour12: true
     }).format(new Date());
   }
@@ -58,7 +66,7 @@ export class DatedBlankPagePlugin extends PluginBaseShortcut {
     }
 
     // then the date and time
-    blob += `\n${this.formatDateTime()}\n`;
+    blob += `\n${this.formatDate()}          ${this.formatTime()}\n`;
 
     // then the dividing line
     for (let i = 0; i < dividerLength; i++) {
@@ -66,18 +74,36 @@ export class DatedBlankPagePlugin extends PluginBaseShortcut {
     }
     blob += '\n\n';
     // marking where we want the cursor to land before we add more space
-    const mark = context.editor.value.length + blob.length;
+    const currentContent = context.editor.textContent || '';
+    const mark = currentContent.length + blob.length;
 
     // then the blank lines after so there's plenty of room to type
     for (let i = 0; i < blankLinesAfter; i++) {
       blob += '\n';
     }
-    context.editor.value += blob;
+
+    // Update content using innerHTML to preserve whitespace
+    context.editor.innerHTML = currentContent + blob;
     context.editor.scrollTop = context.editor.scrollHeight;
-    context.editor.setSelectionRange(mark, mark);
+
+    // Set cursor position using Selection API
+    const textNode = context.editor.firstChild;
+    if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+      const range = document.createRange();
+      const selection = window.getSelection();
+      const actualPosition = Math.min(mark, textNode.textContent.length);
+
+      range.setStart(textNode, actualPosition);
+      range.setEnd(textNode, actualPosition);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
     context.editor.dispatchEvent(new Event('input'))
     this.performing = false
     statusStore.updateStat('blank-page', performance.now() - start)
   }
+
+
 
 }

@@ -2,6 +2,7 @@ import { ref, watch } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import { useConfigStore } from '@/stores/config';
 import { useStatusStore } from '@/stores/status';
+import { getEditorContent, getVisibleRange, getCharacterPosition } from '@/utils/editorUtils';
 
 function debounce(fn, delay) {
   let timeoutId;
@@ -33,14 +34,7 @@ export class MediaScannerPlugin {
   }
 
   getVisibleRange() {
-    const editor = this.context.editor;
-    const linesInContent = this.content.split('\n').length;
-    const scrollInLines = Math.round(editor.scrollTop / this.lineHeightInPixels);
-    const startLine = Math.max(scrollInLines, 0);
-    const endLine = Math.min(startLine + this.visibleLineCount, linesInContent);
-    const startPos = this.getCharacterPosition(startLine);
-    const endPos = this.getCharacterPosition(endLine);
-    return { startPos, endPos };
+    return getVisibleRange(this.context.editor, this.content, this.lineHeightInPixels);
   }
 
   get visibleLineCount() {
@@ -50,24 +44,12 @@ export class MediaScannerPlugin {
   }
 
   getCharacterPosition(lineNumber) {
-    const lines = this.content.split('\n');
-    let position = 0;
-    // Sum up lengths of all previous lines, plus their newline characters
-    for (let i = 0; i < lineNumber; i++) {
-      try {
-        position += lines[i].length + 1; // +1 for the newline character
-      } catch (error) {
-        // This happens when the textarea is allowed to soft wrap, because
-        // the editor content has more lines than just splitting on \n.
-        console.log(`Unable to get character position for lineNumber: ${lineNumber}`)
-      }
-    }
-    return position;
+    return getCharacterPosition(this.content, lineNumber);
   }
 
   async scanViewport() {
     if (!this.context.editor) return;
-    this.content = this.context.editor.value
+    this.content = this.context.content || ''
     if (this.isScanning.value) return;
 
     try {

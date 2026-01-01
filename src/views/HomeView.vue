@@ -1,11 +1,29 @@
 <template>
   <main class="flex">
-    <textarea
-      ref="editor"
-      class="editor"
-      wrap="off"
-      spellcheck="false"
-    ></textarea>
+    <div class="editor-container">
+      <div
+        ref="editor"
+        class="editor"
+        contenteditable="true"
+        spellcheck="false"
+        @scroll="onEditorScroll"
+      ></div>
+
+      <!-- Debug overlay -->
+      <div
+        v-if="configStore.debugMode"
+        class="debug-overlay"
+      >
+        <div
+          v-for="lineNumber in totalLines"
+          :key="lineNumber"
+          class="debug-line"
+          :style="{ top: (lineNumber - 1) * 20 - scrollTop + 'px' }"
+        >
+          <span class="line-number">{{ lineNumber }}</span>
+        </div>
+      </div>
+    </div>
 
     <MediaPanel
       :mediaFiles="mediaFiles"
@@ -17,7 +35,7 @@
 </template>
 
 <script setup>
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, ref, watch, computed } from 'vue'
 import { useConfigStore } from '@/stores/config'
 import { useStatusStore } from '@/stores/status'
 import { useMedia } from '@/composables/useMedia'
@@ -27,6 +45,7 @@ import { PluginManager } from '../plugins/pluginManager'
 import MediaPanel from '@/components/MediaPanel.vue'
 import DragDropOverlay from '@/components/DragDropOverlay.vue'
 import { invoke } from '@tauri-apps/api/core'
+import { getEditorContent, getVisibleLines } from '@/utils/editorUtils'
 
 
 const configStore = useConfigStore()
@@ -38,6 +57,18 @@ const mediaFiles = ref([])
 
 const pluginManager = ref({})
 const pluginContext = ref(null)
+const scrollTop = ref(0)
+
+const totalLines = computed(() => {
+  const noteContent = content.value || ''
+  return noteContent.split('\n').length
+})
+
+const onEditorScroll = () => {
+  if (editor.value) {
+    scrollTop.value = editor.value.scrollTop
+  }
+}
 
 
 // Keeping this around for a bit so we find out sooner if we introduce a problem.
@@ -96,9 +127,17 @@ const initPlugins = async () => {
 
 // Watch for file loaded state to initialize plugins
 watch(() => statusStore.fileLoaded, (isLoaded) => {
-  editor.value.value = content.value
+  editor.value.innerHTML = content.value
   if (isLoaded) {
     initPlugins()
+  }
+})
+
+// Watch for debug mode toggle to trigger reactivity
+watch(() => configStore.debugMode, () => {
+  // Force reactivity update for debug overlay
+  if (editor.value) {
+    onEditorScroll()
   }
 })
 </script>
@@ -110,21 +149,62 @@ watch(() => statusStore.fileLoaded, (isLoaded) => {
   position: relative;
 }
 
-textarea.editor {
+.editor-container {
+  position: relative;
   width: 66.666667%;
   height: 92vh;
+}
+
+div.editor {
+  width: 100%;
+  height: 100%;
   border: none;
   outline: none;
-  resize: none;
   padding: 0 20px;
   color: var(--color-text);
   background: var(--color-background);
   font-family: monospace;
   font-size: 13.3333px;
   line-height: 20px;
+  overflow-y: auto;
+  white-space: pre;
 }
 
-textarea.editor::-webkit-scrollbar {
+div.editor::-webkit-scrollbar {
   display: none;
 }
+
+.debug-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 80px;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.debug-line {
+  position: absolute;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  font-size: 10px;
+  font-family: monospace;
+  padding: 0 4px;
+  opacity: 0.7;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  width: 100%;
+}
+
+.debug-line.visible {
+  background: rgba(0, 255, 0, 0.2);
+  opacity: 1;
+}
+
+.line-number {
+  color: #fff;
+  width: 30px;
+  text-align: right;
+}
+
 </style>

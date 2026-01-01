@@ -3,6 +3,7 @@ import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { useConfigStore } from '@/stores/config';
 import { scrollToLine } from '@/utils/scrollToLine';
+import { getEditorContent } from '@/utils/editorUtils';
 
 export class Find extends PluginBaseShortcut {
   constructor() {
@@ -259,6 +260,7 @@ export class Find extends PluginBaseShortcut {
     
     const activeMatch = this.currentResults.matches[this.activeResultIndex];
     if (activeMatch && this.context?.editor) {
+      // Simple line jump - no soft wrap with white-space: pre
       scrollToLine(this.context.editor, activeMatch.line_number, { keepFocus: keepSearchFocus });
       if (keepSearchFocus) {
         this.searchUI.input.focus();

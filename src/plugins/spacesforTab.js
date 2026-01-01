@@ -1,6 +1,7 @@
 import { PluginBaseShortcut } from '@/plugins/PluginBaseShortcut'
 import { listen } from '@tauri-apps/api/event';
 import { useStatusStore } from '@/stores/status'
+import { getEditorContent } from '@/utils/editorUtils'
 
 export class SpacesForTabPlugin extends PluginBaseShortcut {
   constructor() {
@@ -19,12 +20,23 @@ export class SpacesForTabPlugin extends PluginBaseShortcut {
   }
 
   perform(context) {
-    const cursor = context.editor.selectionStart;
-    let blob = '    ';
-    let content = context.editor.value
-    context.editor.value = content.substring(0, cursor) + blob + content.substring(cursor);
-    const newCursor = cursor + blob.length;
-    context.editor.setSelectionRange(newCursor, newCursor)
+    // Get current selection
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    
+    const range = selection.getRangeAt(0);
+    
+    // Insert the spaces directly at the cursor position
+    const textNode = document.createTextNode('    ');
+    range.deleteContents();
+    range.insertNode(textNode);
+    
+    // Move cursor to after the inserted spaces
+    range.setStartAfter(textNode);
+    range.setEndAfter(textNode);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    
     context.editor.dispatchEvent(new Event('input'))
   }
 
