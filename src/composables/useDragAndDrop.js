@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useStatusStore } from '@/stores/status'
 import { invoke } from '@tauri-apps/api/core';
+import { getEditorContent } from '@/utils/editorUtils'
 
 export function useDragAndDrop(context) {
   const statusStore = useStatusStore()
@@ -10,20 +11,27 @@ export function useDragAndDrop(context) {
   const insertFileAtCursor = async (path) => {
     try {
       await invoke('move_media', { path })
-      const content = context.editor.value
-      const blob = `${path.split('/').pop()}\n`
-      const encoder = new TextEncoder();
-      const decoder = new TextDecoder();
+      const filename = `${path.split('/').pop()}\n`
+      
+      // Get current selection
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
 
-      const before = encoder.encode(content.substring(0, currentCursor.value));
-      const middle = encoder.encode(blob);
-      const after = encoder.encode(content.substring(currentCursor.value));
+      const range = selection.getRangeAt(0);
+      
+      // Create text node with filename
+      const textNode = document.createTextNode(filename);
 
-      const combined = new Uint8Array(before.length + middle.length + after.length);
-      combined.set(before, 0);
-      combined.set(middle, before.length);
-      combined.set(after, before.length + middle.length);
-      context.editor.value = decoder.decode(combined)
+      // Insert the text directly at the cursor position
+      range.deleteContents();
+      range.insertNode(textNode);
+
+      // Move cursor to after the inserted text
+      range.setStartAfter(textNode);
+      range.setEndAfter(textNode);
+      selection.removeAllRanges();
+      selection.addRange(range);
+
       context.editor.dispatchEvent(new Event('input'))
     } catch(error) {
       statusStore.setError(error)

@@ -10,10 +10,8 @@
 export function getEditorContent(editor) {
   if (!editor) return '';
   
-  // For contenteditable elements, use innerText to get actual text content
-  // For textarea elements, use value
   if (editor.contentEditable === 'true' || editor.isContentEditable) {
-    return editor.innerText || editor.textContent || '';
+    return editor.innerText || '';
   }
   
   return editor.value || '';

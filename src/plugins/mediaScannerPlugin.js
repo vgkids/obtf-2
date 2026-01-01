@@ -49,7 +49,7 @@ export class MediaScannerPlugin {
 
   async scanViewport() {
     if (!this.context.editor) return;
-    this.content = this.context.content || ''
+    this.content = getEditorContent(this.context.editor)
     if (this.isScanning.value) return;
 
     try {

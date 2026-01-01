@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { useConfigStore } from '@/stores/config'
 import { useStatusStore } from '@/stores/status'
+import { getEditorContent } from '@/utils/editorUtils'
 
 
 
@@ -58,7 +59,7 @@ export class SaveManager {
   async saveAll() {
     if (!this._editor) return
     const statusStore = useStatusStore()
-    const content = this._editor.textContent || ''
+    const content = getEditorContent(this._editor)
     statusStore.setLineCount(content.split('\n').length)
     const start = performance.now();
     await this.saveCursorPosition()
@@ -82,7 +83,8 @@ export class SaveManager {
 
   async saveNotes() {
     const configStore = useConfigStore()
-    const content = this._editor.textContent || ''
+    debugger
+    const content = getEditorContent(this._editor)
     await invoke('update_file', {
       filename: configStore.filename,
       content: content
@@ -91,7 +93,7 @@ export class SaveManager {
 
   restoreCursorPosition() {
     if (!this._editor) return
-    const content = this._editor.textContent || ''
+    const content = getEditorContent(this._editor)
     const savedPosition = parseInt(localStorage.getItem('cursor')) || 0
     const maxPosition = content.length
 
@@ -103,7 +105,7 @@ export class SaveManager {
     if (textNode.nodeType === Node.TEXT_NODE) {
       const range = document.createRange()
       const selection = window.getSelection()
-      const actualPosition = Math.min(safePosition, textNode.textContent.length)
+      const actualPosition = Math.min(safePosition, textNode.nodeValue.length)
 
       range.setStart(textNode, actualPosition)
       range.setEnd(textNode, actualPosition)
