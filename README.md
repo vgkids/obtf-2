@@ -2,17 +2,27 @@ OBTF-2 is a minimalist app for creating a personal work history.
 
 It's comprised of:
 
-- **~/Documents/OBTF**     Plain text files to store your notes
-- **/plugins**   Editor tools *[currently at src/plugins]*
+- **~/Documents/OBTF/notes.txt**     Plain text files to store your notes
+- **~/Documents/OBTF/media**     A folder where images you add will be stored
 - **/src**       VueJS text editor
+- **/plugins**   Editor tools *[currently at src/plugins]*
 - **/src-tauri** Backend and app generator to access the filesystem
-
+- **/site** Jekyll blog and user documentation
 
 Quick Start
 ```
 npm run tauri dev
 ```
 This will start the development server and launch the app
+
+Building the binary
+
+(Tested with MacOs)
+
+```
+npm run tauri build
+```
+
 
 # Philosophy
 Creating a personal work history is one of the highest impact habits I've developed, as it allows a place for reflection and improvement. What was my rationale for a decision, unbiased by how I feel about it now? Are my actions in alignment with my priorities? How do I actually spend my time? When I had this problem 3 years ago, what was that snippet of code that fixed it?
