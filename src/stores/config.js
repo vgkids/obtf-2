@@ -22,6 +22,10 @@ export const useConfigStore = defineStore('config', () => {
   const setWorkingDirectory = async () => {
     try {
       const path = await join(await documentDir(), 'OBTF')
+      
+      // Create OBTF directory if it doesn't exist
+      await invoke('ensure_directory_exists', { path })
+      
       await invoke('set_directory', {
         path
       })

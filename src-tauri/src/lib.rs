@@ -356,6 +356,16 @@ async fn search_text(
     })
 }
 
+#[tauri::command]
+fn ensure_directory_exists(path: String) -> Result<FileResponse, String> {
+    match fs::create_dir_all(&path) {
+        Ok(_) => Ok(FileResponse {
+            message: format!("Directory ensured: {}", path),
+        }),
+        Err(e) => Err(format!("Failed to create directory {}: {}", path, e)),
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app_state = init_app_state();
@@ -382,7 +392,8 @@ pub fn run() {
             set_directory,
             get_menu_items,
             set_menu_items,
-            search_text
+            search_text,
+            ensure_directory_exists
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

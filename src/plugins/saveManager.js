@@ -83,7 +83,6 @@ export class SaveManager {
 
   async saveNotes() {
     const configStore = useConfigStore()
-    debugger
     const content = getEditorContent(this._editor)
     await invoke('update_file', {
       filename: configStore.filename,

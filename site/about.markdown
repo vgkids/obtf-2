@@ -8,7 +8,7 @@ OBTF-2 was written by [James Marks](https://www.linkedin.com/in/jameslmarks/) as
 
 Download links:
 
-[Download for MacOS (Apple Silicon)]({{ site.baseurl }}/assets/downloads/obtf-2.zip)
+[Download for MacOS (Apple Silicon)]({{ site.baseurl }}/assets/downloads/obtf-2_0.1.0_aarch64.dmg)
 
 Note: If you get an error about the download being corrupted, it's because I haven't paid Apple for a  Developer License recently. You can verify the build by hand like so:
 

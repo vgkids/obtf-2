@@ -27,6 +27,6 @@ All of these things turn into _decisions_ that need to be made to take a note. T
 - Keep your notes readable a long time from now
 
 
-[Download for MacOS (Apple Silicon)]({{ site.baseurl }}/assets/downloads/obtf-2.zip)
+[Download for MacOS (Apple Silicon)]({{ site.baseurl }}/assets/downloads/obtf-2_0.1.0_aarch64.dmg)
 
 
