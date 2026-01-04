@@ -13,7 +13,7 @@ In OBTF-2, you can drag/drop an image onto your notes and two things happen:
 When the add the name of an image from /media to your notes, it displays on the sidebar:
 
 
-![OBTF-2 Screenshot displaying a screenshotfile]({{ site.baseurl }}assets/images/obtf-2-using-screenshots.png)
+![OBTF-2 Screenshot displaying a screenshotfile]({{ site.baseurl }}/assets/images/obtf-2-using-screenshots.png)
 
 Things to know:
 

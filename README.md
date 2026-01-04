@@ -31,6 +31,8 @@ Start the Jekyll dev server:
 cd site && bundle exec jekyll serve
 ```
 
+And then visit the site at http://127.0.0.1:4000/obtf-2/
+
 Merges to `main` will trigger a deploy via Github pages.
 
 
