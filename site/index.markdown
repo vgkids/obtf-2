@@ -11,19 +11,22 @@ Basically, just keep writing in a big text file, sometimes adding the date. OBTF
 
 #### OBTF-2 does not:
 
-- Store data in a special format
+- Require a subscription
 - Allow you to choose the font, style, or color
 - Support categories of notes or tagging
 - Sync your notes across devices
 - Support markdown, syntax highlighting, LaTeX, etc
 
-All of these things turn into _decisions_ that need to be made, which are destractions to the _actual_ thing you're trying to do.
+All of these things turn into _decisions_ that need to be made to take a note. They are distractions to the _actual_ thing you're trying to do. If you need that stuff, that's fine–– but OBTF-2 is not for you.
 
 #### What it does, OBTF-2 strives to do well:
 
-- Store your notes in a format that will be accessible in 100 years
 - Reduce friction to keeping notes
 - Display images (like screenshots) alongside text
-- Find things in your notes
+- Find things you wrote before
+- Keep your notes readable a long time from now
 
-[Download for MacOS (Apple Silicon)](/assets/downloads/obtf-2_0.1.0_aarch64.dmg).
+
+[Download for MacOS (Apple Silicon)](/assets/downloads/obtf-2.zip)
+
+

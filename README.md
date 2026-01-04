@@ -24,6 +24,16 @@ npm run tauri build
 ```
 
 
+## Updating the documentation
+
+Start the Jekyll dev server:
+```
+cd site && bundle exec jekyll serve
+```
+
+Merges to `main` will trigger a deploy via Github pages.
+
+
 # Philosophy
 Creating a personal work history is one of the highest impact habits I've developed, as it allows a place for reflection and improvement. What was my rationale for a decision, unbiased by how I feel about it now? Are my actions in alignment with my priorities? How do I actually spend my time? When I had this problem 3 years ago, what was that snippet of code that fixed it?
 
